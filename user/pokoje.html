@@ -4,211 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokoje</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .avatar {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        .avatar img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .pokoje-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .pokoj {
-            display: flex;
-            width: 80%;
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .zdjecie-container {
-            width: 50%;
-            position: relative;
-        }
-        .zdjecie-container img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-        .strzalka {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-            font-size: 20px;
-        }
-        .strzalka-lewo {
-            left: 10px;
-        }
-        .strzalka-prawo {
-            right: 10px;
-        }
-        .info {
-            width: 50%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        h2 {
-            margin-top: 0;
-        }
-        .cena {
-            font-size: 20px;
-            font-weight: bold;
-            color: #e67e22;
-        }
-        .wynajem {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .wynajem input {
-            padding: 5px;
-            font-size: 16px;
-        }
-        .wynajem button {
-            padding: 10px;
-            background: #2ecc71;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .wynajem button:hover {
-            background: #27ae60;
-        }
-    </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Lista dostępnych pokoi</h1>
-        <div class="avatar" onclick="window.location.href='user.html'">
-            <img src="avatar.jpg" alt="User Avatar">
-            <span>User</span>
-        </div>
-    </div>
-
-    <div class="pokoje-container" id="pokoje-container">
-        <!-- Pokoje będą dodane tutaj przez JavaScript -->
-    </div>
+    <h1>Lista dostępnych pokoi</h1>
+    
+    <div id="pokoje-container"></div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch("http://localhost:3000/pokoje")
-                .then(response => response.json())
-                .then(data => {
-                    const pokojeContainer = document.getElementById("pokoje-container");
+        async function loadPokoje() {
+            const res = await fetch("http://localhost:3000/pokoje");
+            const pokoje = await res.json();
+            document.querySelector("#pokoje-container").innerHTML = pokoje.map(
+                pokoj => `
+                    <div>
+                        <h2>${pokoj.nazwa}</h2>
+                        <p>${pokoj.dlugiopis}</p>
+                        <p>${pokoj.cena} zł</p>
+                        <input type="date" id="data-${pokoj.id}">
+                        <button onclick="wynajmij(${pokoj.id})">Wynajmij</button>
+                    </div>`
+            ).join('');
+        }
 
-                    data.forEach(pokoj => {
-                        const pokojDiv = document.createElement("div");
-                        pokojDiv.classList.add("pokoj");
+        async function wynajmij(id) {
+            const data = document.querySelector(`#data-${id}`).value;
+            if (!data) {
+                alert("Wybierz datę!");
+                return;
+            }
 
-                        const zdjecia = JSON.parse(pokoj.zdjecia);
-                        let indexZdjecia = 0;
+            await fetch(`http://localhost:3000/wynajmij/${data}/${id}`);
+            alert("Pokój wynajęty!");
+        }
 
-                        pokojDiv.innerHTML = `
-                            <div class="zdjecie-container">
-                                <button class="strzalka strzalka-lewo">&lt;</button>
-                                <img src="zdjecia/${zdjecia[indexZdjecia]}" alt="Zdjęcie pokoju">
-                                <button class="strzalka strzalka-prawo">&gt;</button>
-                            </div>
-
-                            <div class="info">
-                                <h2>${pokoj.nazwa}</h2>
-                                <p>${pokoj.dlugiopis}</p>
-                                <p class="cena">${pokoj.cena} zł</p>
-
-                                <div class="wynajem">
-                                    <input type="date" class="data-wynajmu">
-                                    <button class="wynajmij-btn" data-id="${pokoj.id}">Wynajmij</button>
-                                </div>
-                            </div>
-                        `;
-
-                        // Obsługa przewijania zdjęć
-                        const imgElement = pokojDiv.querySelector("img");
-                        const lewoBtn = pokojDiv.querySelector(".strzalka-lewo");
-                        const prawoBtn = pokojDiv.querySelector(".strzalka-prawo");
-
-                        lewoBtn.addEventListener("click", () => {
-                            indexZdjecia = (indexZdjecia - 1 + zdjecia.length) % zdjecia.length;
-                            imgElement.src = "zdjecia/" + zdjecia[indexZdjecia];
-                        });
-
-                        prawoBtn.addEventListener("click", () => {
-                            indexZdjecia = (indexZdjecia + 1) % zdjecia.length;
-                            imgElement.src = "zdjecia/" + zdjecia[indexZdjecia];
-                        });
-
-                        // Obsługa kliknięcia "Wynajmij"
-                        const wynajmijBtn = pokojDiv.querySelector(".wynajmij-btn");
-                        wynajmijBtn.addEventListener("click", () => {
-                            const dataWynajmu = pokojDiv.querySelector(".data-wynajmu").value;
-                            const idPokoju = wynajmijBtn.getAttribute("data-id");
-
-                            if (!dataWynajmu) {
-                                alert("Proszę podać datę końca wynajmu!");
-                                return;
-                            }
-
-                            fetch("http://localhost:3000/wynajmij", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    id_pokoju: idPokoju,
-                                    wynajety_do: dataWynajmu
-                                }),
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                alert(data.message);
-                            })
-                            .catch(error => {
-                                console.error("Błąd:", error);
-                                alert("Nie udało się wynająć pokoju!");
-                            });
-                        });
-
-                        pokojeContainer.appendChild(pokojDiv);
-                    });
-                })
-                .catch(error => console.error("Błąd podczas pobierania pokoi:", error));
-        });
+        loadPokoje();
     </script>
-
-    
-
 </body>
 </html>
