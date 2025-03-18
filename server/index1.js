@@ -35,10 +35,19 @@ app.get("/pokoje", (req, res) => {
   });
 });
 
-app.get("/wynajmij/:data/:pokoj", (req, res) => {
-  const { data, pokoj } = req.params;
-  const sql = `INSERT INTO zamowienia("id_pokoju", "data", "uzytkownik") VALUES ('${pokoj}','${data}','user') ("", "")`;
-  conn.query(sql);
-  console.log(`: ${tytul} - ${autor}`);
-  res.send("Dodano");
+app.get("/wynajmij/:pokoj/:data", (req, res) => {
+  const { pokoj, data } = req.params;
+  const sql = `INSERT INTO zamowienia (nazwa_pokoju, data, uzytkownik) VALUES ("${pokoj}", "${data}", "user")`;
+  
+  db.query(sql, (err, result) => {
+      if (err) {
+          console.log("Błąd podczas zapisu do bazy:", err);
+          res.send("Wystąpił błąd!");
+      } else {
+          console.log(`Dodano rezerwację: Pokój ${pokoj}, Data ${data}, Użytkownik: user`);
+          res.send("Pokój został wynajęty!");
+      }
+  });
 });
+
+
