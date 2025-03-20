@@ -5,17 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokoje</title>
     <style>
+        /* Podstawowy styl strony */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
         }
+
+        /* Styl nagłówka strony */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
         }
+
+        /* Styl dla avatara użytkownika */
         .avatar {
             display: flex;
             align-items: center;
@@ -27,12 +32,16 @@
             border-radius: 50%;
             margin-right: 10px;
         }
+
+        /* Kontener na listę pokoi */
         .pokoje-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
         }
+
+        /* Styl pojedynczego pokoju */
         .pokoj {
             display: flex;
             width: 80%;
@@ -41,6 +50,8 @@
             border: black 1px solid;
             border-radius: 5px;
         }
+
+        /* Kontener na zdjęcia pokoju */
         .zdjecie-container {
             width: 50%;
             position: relative;
@@ -51,6 +62,8 @@
             object-fit: cover;
             border-radius: 5px;
         }
+
+        /* Strzałki do przewijania zdjęć */
         .strzalka {
             position: absolute;
             top: 50%;
@@ -68,6 +81,8 @@
         .strzalka-prawo {
             right: 10px;
         }
+
+        /* Sekcja z informacjami o pokoju */
         .info {
             width: 50%;
             padding: 20px;
@@ -82,6 +97,8 @@
             font-size: 20px;
             font-weight: bold;
         }
+
+        /* Sekcja do wynajmu pokoju */
         .wynajem {
             margin-top: 15px;
             display: flex;
@@ -107,32 +124,36 @@
 </head>
 <body>
 
+    <!-- Nagłówek strony -->
     <div class="header">
-        <h1>Lista dostępnych pokoi</h1>
+        <h1><a href="user.html" style="text-decoration: none; color: black;">Lista dostępnych pokoi</a></h1>
         <div class="avatar" onclick="window.location.href='user.html'">
             <img src="avatar.jpg" alt="User Avatar">
             <span>User</span>
         </div>
     </div>
 
-    <div class="pokoje-container" id="pokoje-container">
-        <!-- Pokoje będą dodane tutaj przez JavaScript -->
-    </div>
+    <!-- Kontener na pokoje (zostanie uzupełniony przez JavaScript) -->
+    <div class="pokoje-container" id="pokoje-container"></div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // Pobranie listy pokoi z serwera
             fetch("http://localhost:3000/pokoje")
                 .then(response => response.json())
                 .then(data => {
                     const pokojeContainer = document.getElementById("pokoje-container");
 
                     data.forEach(pokoj => {
+                        // Tworzenie elementu pokoju
                         const pokojDiv = document.createElement("div");
                         pokojDiv.classList.add("pokoj");
 
+                        // Pobranie zdjęć z JSON-a
                         const zdjecia = JSON.parse(pokoj.zdjecia);
                         let indexZdjecia = 0;
 
+                        // Wypełnienie HTML dla pokoju
                         pokojDiv.innerHTML = `
                             <div class="zdjecie-container">
                                 <button class="strzalka strzalka-lewo">&lt;</button>
@@ -167,7 +188,7 @@
                             imgElement.src = "zdjecia/" + zdjecia[indexZdjecia];
                         });
 
-                        // Obsługa wynajmu
+                        // Obsługa wynajmu pokoju
                         const wynajmijBtn = pokojDiv.querySelector(".wynajmij-btn");
                         wynajmijBtn.addEventListener("click", () => {
                             const dataWynajmu = pokojDiv.querySelector("input[type='date']").value;
@@ -178,6 +199,7 @@
                                 return;
                             }
 
+                            // Wysyłanie żądania wynajmu do serwera
                             fetch(`http://localhost:3000/wynajmij/${pokojId}/${dataWynajmu}`)
                                 .then(response => response.text())
                                 .then(result => {
@@ -187,6 +209,7 @@
                                 .catch(error => console.error("Błąd wynajmu:", error));
                         });
 
+                        // Dodanie pokoju do kontenera
                         pokojeContainer.appendChild(pokojDiv);
                     });
                 })
