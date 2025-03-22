@@ -116,3 +116,25 @@ app.get("/moje-pokoje", (req, res) => {
     }
   });
 });
+
+// ========================
+// Pobieranie przeszłych rezerwacji (historia)
+// ========================
+app.get("/historia-pokoi", (req, res) => {
+  const sql = `
+      SELECT p.*, z.data AS data_wynajmu 
+      FROM pokoje p
+      JOIN zamowienia z ON p.id = z.nazwa_pokoju
+      WHERE z.uzytkownik = "USER" AND z.data < CURDATE()
+  `;
+
+  db.query(sql, (err, results) => {
+      if (err) {
+          console.log("Błąd przy pobieraniu historii pokoi:", err);
+          res.send("Wystąpił błąd!");
+      } else {
+          console.log("Pobrano historię pokoi użytkownika USER");
+          res.json(results);
+      }
+  });
+});

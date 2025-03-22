@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokoje</title>
+    <title>Historia zamówień</title>
     <style>
-        /* Stylizacja całej strony */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
         }
 
-        /* Nagłówek strony */
         .header {
             display: flex;
             justify-content: space-between;
@@ -20,7 +18,6 @@
             padding: 10px 20px;
         }
 
-        /* Stylizacja avatara użytkownika */
         .avatar {
             display: flex;
             align-items: center;
@@ -33,7 +30,6 @@
             margin-right: 10px;
         }
 
-        /* Kontener na listę pokoi */
         .pokoje-container {
             display: flex;
             flex-direction: column;
@@ -41,7 +37,6 @@
             margin-top: 20px;
         }
 
-        /* Styl pojedynczego pokoju */
         .pokoj {
             display: flex;
             width: 80%;
@@ -51,7 +46,6 @@
             border-radius: 5px;
         }
 
-        /* Kontener na zdjęcia pokoju */
         .zdjecie-container {
             width: 50%;
             position: relative;
@@ -61,28 +55,9 @@
             height: 300px;
             object-fit: cover;
             border-radius: 5px;
+            filter: grayscale(100%);
         }
 
-        /* Stylizacja przycisków do przewijania zdjęć */
-        .strzalka {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-            font-size: 20px;
-        }
-        .strzalka-lewo {
-            left: 10px;
-        }
-        .strzalka-prawo {
-            right: 10px;
-        }
-
-        /* Sekcja informacji o pokoju */
         .info {
             width: 50%;
             padding: 20px;
@@ -94,7 +69,6 @@
             margin-top: 0;
         }
 
-        /* Cena pokoju */
         .cena {
             font-size: 20px;
             font-weight: bold;
@@ -103,50 +77,40 @@
 </head>
 <body>
 
-    <!-- Nagłówek strony z tytułem i awatarem użytkownika -->
     <div class="header">
-        <h1><a href="historia.html" style="text-decoration: none; color: black;">Wynajęte mieszkania</a></h1>
+        <h1><a href="pokoje.html" style="text-decoration: none; color: black;">Historia zamówień</a></h1>
         <div class="avatar" onclick="window.location.href='user.html'">
             <img src="avatar.jpg" alt="User Avatar">
             <span>User</span>
         </div>
     </div>
 
-    <!-- Kontener, do którego dynamicznie dodawane będą pokoje -->
     <div class="pokoje-container" id="pokoje-container">
-        <!-- Pokoje będą dodane tutaj przez JavaScript -->
+        <!-- Pokoje z historii zamówień będą dodane tutaj przez JavaScript -->
     </div>
 
     <script>
-        // Funkcja uruchamiana po załadowaniu strony
         document.addEventListener("DOMContentLoaded", () => {
-            // Pobranie wynajętych pokoi użytkownika
-            fetch("http://localhost:3000/moje-pokoje")
-                .then(response => response.json()) // Parsowanie odpowiedzi jako JSON
+            fetch("http://localhost:3000/historia-pokoi")
+                .then(response => response.json())
                 .then(data => {
                     const pokojeContainer = document.getElementById("pokoje-container");
 
-                    // Jeśli użytkownik nie ma żadnych aktywnych rezerwacji
                     if (data.length === 0) {
-                        pokojeContainer.innerHTML = "<h2>Nie masz żadnych aktywnych rezerwacji.</h2>";
+                        pokojeContainer.innerHTML = "<h2>Nie masz żadnych poprzednich rezerwacji.</h2>";
                         return;
                     }
 
-                    // Iteracja po wynajętych pokojach i ich dodanie do strony
                     data.forEach(pokoj => {
                         const pokojDiv = document.createElement("div");
                         pokojDiv.classList.add("pokoj");
 
-                        // Parsowanie JSON-a ze zdjęciami
                         const zdjecia = JSON.parse(pokoj.zdjecia);
-                        let indexZdjecia = 0; // Zmienna śledząca aktualne zdjęcie
+                        let indexZdjecia = 0;
 
-                        // Tworzenie HTML dla pokoju
                         pokojDiv.innerHTML = `
                             <div class="zdjecie-container">
-                                <button class="strzalka strzalka-lewo">&lt;</button>
                                 <img src="zdjecia/${zdjecia[indexZdjecia]}" alt="Zdjęcie pokoju">
-                                <button class="strzalka strzalka-prawo">&gt;</button>
                             </div>
 
                             <div class="info">
@@ -157,28 +121,10 @@
                             </div>
                         `;
 
-                        // Obsługa przewijania zdjęć dla danego pokoju
-                        const imgElement = pokojDiv.querySelector("img");
-                        const lewoBtn = pokojDiv.querySelector(".strzalka-lewo");
-                        const prawoBtn = pokojDiv.querySelector(".strzalka-prawo");
-
-                        // Obsługa kliknięcia przycisku "w lewo"
-                        lewoBtn.addEventListener("click", () => {
-                            indexZdjecia = (indexZdjecia - 1 + zdjecia.length) % zdjecia.length;
-                            imgElement.src = "zdjecia/" + zdjecia[indexZdjecia];
-                        });
-
-                        // Obsługa kliknięcia przycisku "w prawo"
-                        prawoBtn.addEventListener("click", () => {
-                            indexZdjecia = (indexZdjecia + 1) % zdjecia.length;
-                            imgElement.src = "zdjecia/" + zdjecia[indexZdjecia];
-                        });
-
-                        // Dodanie pokoju do kontenera na stronie
                         pokojeContainer.appendChild(pokojDiv);
                     });
                 })
-                .catch(error => console.error("Błąd podczas pobierania pokoi:", error));
+                .catch(error => console.error("Błąd podczas pobierania historii pokoi:", error));
         });
     </script>
 </body>

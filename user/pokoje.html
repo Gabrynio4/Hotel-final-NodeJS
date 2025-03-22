@@ -126,7 +126,7 @@
 
     <!-- Nagłówek strony -->
     <div class="header">
-        <h1><a href="user.html" style="text-decoration: none; color: black;">Lista dostępnych pokoi</a></h1>
+        <h1><a href="user.html" style="text-decoration: none; color: black;">Lista dostępnych mieszkań</a></h1>
         <div class="avatar" onclick="window.location.href='user.html'">
             <img src="avatar.jpg" alt="User Avatar">
             <span>User</span>
@@ -138,7 +138,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Pobranie listy pokoi z serwera
+        // Pobranie listy pokoi z serwera
             fetch("http://localhost:3000/pokoje")
                 .then(response => response.json())
                 .then(data => {
@@ -152,6 +152,11 @@
                         // Pobranie zdjęć z JSON-a
                         const zdjecia = JSON.parse(pokoj.zdjecia);
                         let indexZdjecia = 0;
+
+                        // Ustalenie minimalnej daty (od jutra)
+                        let tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        let minDate = tomorrow.toISOString().split("T")[0];
 
                         // Wypełnienie HTML dla pokoju
                         pokojDiv.innerHTML = `
@@ -167,7 +172,7 @@
                                 <p class="cena">${pokoj.cena} zł</p>
 
                                 <div class="wynajem">
-                                    <input type="date">
+                                    <input type="date" min="${minDate}">
                                     <button class="wynajmij-btn" data-id="${pokoj.id}">Wynajmij</button>
                                 </div>
                             </div>
