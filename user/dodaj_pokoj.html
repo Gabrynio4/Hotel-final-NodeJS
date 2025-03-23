@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodaj Pokój</title>
+    <style>
+        /* Podstawowy styl strony */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Styl nagłówka strony */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        /* Styl dla avatara użytkownika */
+        .avatar {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        form {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: rgb(184, 184, 184);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><a href="admin.html" style="text-decoration: none; color: black;">Dodaj pokój</a></h1>
+        <div class="avatar" onclick="window.location.href='pokoje.html'">
+            <img src="avatar.jpg" alt="Admin Avatar">
+            <span>Admin</span>
+        </div>
+    </div>
+
+    <form id="add-room-form">
+        <label for="nazwa">Nazwa pokoju:</label>
+        <input type="text" id="nazwa" required>
+
+        <label for="ulica">Ulica:</label>
+        <input type="text" id="ulica" required>
+
+        <label for="nrdomu">Nr domu/mieszkania:</label>
+        <input type="text" id="nrdomu" required>
+
+        <label for="opis">Krótki opis:</label>
+        <input type="text" id="opis" required>
+
+        <label for="dlugiopis">Opis pokoju:</label>
+        <textarea id="dlugiopis" required></textarea>
+
+        <label for="cena">Cena:</label>
+        <input type="number" id="cena" step="0.01" required>
+
+        <label for="cena_za_m2">Cena za m²:</label>
+        <input type="number" id="cena_za_m2" step="0.01" required>
+
+        <label for="liczba_pokoi">Liczba pokoi:</label>
+        <input type="number" id="liczba_pokoi" required>
+
+        <label for="zdjecia">Zdjęcia (oddzielone przecinkiem):</label>
+        <input type="text" id="zdjecia" required>
+
+        <label for="dostepnosc">Dostępność:</label>
+        <select id="dostepnosc">
+            <option value="1">Tak</option>
+            <option value="0">Nie</option>
+        </select>
+
+        <button type="submit">Dodaj Pokój</button>
+    </form>
+
+    <script>
+        document.getElementById("add-room-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const nowyPokoj = {
+                nazwa: document.getElementById("nazwa").value,
+                ulica: document.getElementById("ulica").value,
+                ["nrdomu/mieszkania"]: document.getElementById("nrdomu").value,
+                opis: document.getElementById("opis").value,
+                dlugiopis: document.getElementById("dlugiopis").value,
+                cena: document.getElementById("cena").value,
+                cena_za_m2: document.getElementById("cena_za_m2").value,
+                liczba_pokoi: document.getElementById("liczba_pokoi").value,
+                zdjecia: JSON.stringify(document.getElementById("zdjecia").value.split(",")),
+                dostepnosc: document.getElementById("dostepnosc").value
+            };
+
+            fetch("http://localhost:3000/admin/pokoje/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(nowyPokoj)
+            })
+            .then(res => res.text())
+            .then(msg => {
+                alert(msg);
+                window.location.href = "pokoje.html";
+            })
+            .catch(error => console.error("Błąd:", error));
+        });
+    </script>
+</body>
+</html>

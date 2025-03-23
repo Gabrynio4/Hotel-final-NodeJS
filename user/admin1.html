@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administratora</title>
+    <style>
+        /* Podstawowy styl strony */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Styl nagłówka strony */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        /* Styl dla avatara użytkownika */
+        .avatar {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* --- Styl tabeli --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nagłówek jak w pokoje.html -->
+    <div class="header">
+        <h1><a href="user.html" style="text-decoration: none; color: black;">Zarządzanie pokojami</a></h1>
+        <div class="avatar" onclick="window.location.href='pokoje.html'">
+            <img src="avatar.jpg" alt="Admin Avatar">
+            <span>Admin</span>
+        </div>
+    </div>
+
+    <table id="pokoje-table">
+        <thead>
+            <tr id="table-header"></tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("http://localhost:3000/admin/pokoje")
+                .then(res => res.json())
+                .then(pokoje => {
+                    if (pokoje.length === 0) return;
+
+                    const tableHeader = document.getElementById("table-header");
+                    const tableBody = document.getElementById("table-body");
+
+                    const columns = Object.keys(pokoje[0]);
+
+                    columns.forEach(col => {
+                        const th = document.createElement("th");
+                        th.textContent = col;
+                        tableHeader.appendChild(th);
+                    });
+
+                    const thActions = document.createElement("th");
+                    thActions.textContent = "Akcje";
+                    tableHeader.appendChild(thActions);
+
+                    pokoje.forEach(pokoj => {
+                        const tr = document.createElement("tr");
+
+                        columns.forEach(col => {
+                            const td = document.createElement("td");
+
+                            if (col === "id") {
+                                td.textContent = pokoj[col];
+                            } else if (col === "dostepnosc") {
+                                const span = document.createElement("span");
+                                span.textContent = pokoj[col] ? "Tak" : "Nie";
+
+                                const select = document.createElement("select");
+                                select.innerHTML = `
+                                    <option value="1" ${pokoj[col] ? "selected" : ""}>Tak</option>
+                                    <option value="0" ${!pokoj[col] ? "selected" : ""}>Nie</option>
+                                `;
+                                select.style.display = "none";
+
+                                td.appendChild(span);
+                                td.appendChild(select);
+                            } else {
+                                const span = document.createElement("span");
+                                span.textContent = pokoj[col];
+
+                                const input = document.createElement("input");
+                                input.type = col.includes("cena") || col === "liczba_pokoi" ? "number" : "text";
+                                input.value = pokoj[col];
+                                input.style.display = "none";
+
+                                td.appendChild(span);
+                                td.appendChild(input);
+                            }
+
+                            tr.appendChild(td);
+                        });
+
+                        const tdActions = document.createElement("td");
+                        const editBtn = document.createElement("button");
+                        editBtn.textContent = "Edytuj";
+
+                        const saveBtn = document.createElement("button");
+                        saveBtn.textContent = "Wykonaj";
+                        saveBtn.style.display = "none";
+
+                        tdActions.appendChild(editBtn);
+                        tdActions.appendChild(saveBtn);
+                        tr.appendChild(tdActions);
+
+                        editBtn.addEventListener("click", () => {
+                            tr.querySelectorAll("span").forEach(span => span.style.display = "none");
+                            tr.querySelectorAll("input, select").forEach(input => input.style.display = "inline");
+
+                            editBtn.style.display = "none";
+                            saveBtn.style.display = "inline";
+                        });
+
+                        saveBtn.addEventListener("click", () => {
+                            const updatedData = {};
+                            columns.forEach(col => {
+                                if (col !== "id") {
+                                    if (col === "dostepnosc") {
+                                        updatedData[col] = tr.querySelector(`td:nth-child(${columns.indexOf(col) + 1}) select`).value;
+                                    } else {
+                                        updatedData[col] = tr.querySelector(`td:nth-child(${columns.indexOf(col) + 1}) input`).value;
+                                    }
+                                }
+                            });
+
+                            updatedData.id = pokoj.id;
+
+                            fetch("http://localhost:3000/admin/pokoje/update", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(updatedData)
+                            }).then(res => res.text()).then(msg => {
+                                alert(msg);
+                                location.reload();
+                            });
+                        });
+
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error("Błąd:", error));
+        });
+    </script>
+
+</body>
+</html>

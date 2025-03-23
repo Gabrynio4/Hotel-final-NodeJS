@@ -138,3 +138,77 @@ app.get("/historia-pokoi", (req, res) => {
       }
   });
 });
+
+// ========================
+// Pobieranie wszystkich pokoi (dla panelu admina)
+// ========================
+app.get("/admin/pokoje", (req, res) => {
+  db.query("SELECT * FROM pokoje", (err, results) => {
+      if (err) {
+          console.log("Błąd pobierania pokoi:", err);
+          res.status(500).send("Błąd serwera");
+      } else {
+          res.json(results);
+      }
+  });
+});
+
+// ========================
+// Edycja pokoju
+// ========================
+app.post("/admin/pokoje/update", (req, res) => {
+  const { id, nazwa, opis, dlugiopis, ulica, ["nrdomu/mieszkania"]: nrdomu_mieszkania, cena, cena_za_m2, liczba_pokoi, dostepnosc } = req.body;
+
+  const sql = `
+      UPDATE pokoje 
+      SET nazwa = ?, opis = ?, dlugiopis = ?, ulica = ?, \`nrdomu/mieszkania\` = ?, cena = ?, cena_za_m2 = ?, liczba_pokoi = ?, dostepnosc = ? 
+      WHERE id = ?
+  `;
+
+  db.query(sql, [nazwa, opis, dlugiopis, ulica, nrdomu_mieszkania, cena, cena_za_m2, liczba_pokoi, dostepnosc, id], (err) => {
+      if (err) {
+          console.log("Błąd aktualizacji:", err);
+          res.status(500).send("Błąd podczas aktualizacji pokoju");
+      } else {
+          res.send("Pomyślnie zaktualizowano pokój");
+      }
+  });
+});
+
+// ========================
+// Usuwanie pokoju
+// ========================
+app.delete("/admin/pokoje/delete/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = "DELETE FROM pokoje WHERE id = ?";
+  db.query(sql, [id], (err) => {
+      if (err) {
+          console.log("Błąd usuwania pokoju:", err);
+          res.status(500).send("Błąd podczas usuwania pokoju");
+      } else {
+          res.send("Pokój został pomyślnie usunięty");
+      }
+  });
+});
+
+// ========================
+// Dodawanie pokoju
+// ========================
+app.post("/admin/pokoje/add", (req, res) => {
+  const { nazwa, ulica, ["nrdomu/mieszkania"]: nrdomu_mieszkania, opis, dlugiopis, cena, cena_za_m2, liczba_pokoi, zdjecia, dostepnosc } = req.body;
+
+  const sql = `
+      INSERT INTO pokoje (nazwa, ulica, \`nrdomu/mieszkania\`, opis, dlugiopis, cena, cena_za_m2, liczba_pokoi, zdjecia, dostepnosc)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [nazwa, ulica, nrdomu_mieszkania, opis, dlugiopis, cena, cena_za_m2, liczba_pokoi, zdjecia, dostepnosc], (err) => {
+      if (err) {
+          console.log("Błąd dodawania pokoju:", err);
+          res.status(500).send("Błąd dodawania pokoju");
+      } else {
+          res.send("Pokój został dodany!");
+      }
+  });
+});
