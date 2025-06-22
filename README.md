@@ -1,6 +1,4 @@
-A web application for browsing, renting, and managing apartments. Users can view available listings, make reservations, and apartment owners can manage their properties.
-
-<h2>Created using:</h2>
+<h1>Created using:</h1>
 <ul>
 <li><b>Backend</b>: Node.js + Express.js  </li>
 <li><b>Frontend</b>: HTML, CSS, JavaScript  </li>
@@ -11,7 +9,18 @@ A web application for browsing, renting, and managing apartments. Users can view
 <h1>Features:</h1>
 <ul>
 <li><h2>For Users:</h2></li>
-well
+    <ul>
+      <li>Register and log in</li>
+      <li>Browse available apartments</li>
+      <li>Make reservations for specific dates</li>
+      <li>Have insight into your currently rented apartments and rental history</li>
+    </ul>
 <li><h2>For Admins:</h2></li>
-shit
+    <ul>
+      <li>Add, edit, and delete apartments</li>
+    </ul>
 </ul>
+<h1>How to run locally:</h1>
+<ol>
+  <li></li>
+</ol>
